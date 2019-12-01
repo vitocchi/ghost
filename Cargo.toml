@@ -1,5 +1,5 @@
 [package]
-name = "contract"
+name = "secret_account"
 version = "0.1.0"
 
 [lib]

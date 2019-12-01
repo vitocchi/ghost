@@ -20,9 +20,9 @@ type Id = [u8; 32];
 type Pass = [u8; 32];
 
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
-struct SecretAccounts (HashMap<Id, Pass>);
+struct Accounts (HashMap<Id, Pass>);
 
-impl SecretAccounts {
+impl Accounts {
     fn registor(&mut self, id:Id, pass: Pass) -> Result<(), &'static str> {
         if self.is_exist(id) {
             return Err("id is already used");
@@ -75,7 +75,7 @@ impl SecretAccounts {
 
 // Private functions accessible only by the secret contract
 impl Contract {
-    fn get_accounts() ->  SecretAccounts {
+    fn get_accounts() ->  Accounts {
         read_state!(SECRET_ACCOUNTS).unwrap()
     }
 }
@@ -147,22 +147,22 @@ mod tests {
     fn registor_test() {
         let id = [0; 32];
         let pass = [1; 32];
-        let mut sa = SecretAccounts(HashMap::new());
-        assert!(sa.registor(id, pass).is_ok());
-        assert!(sa.0.contains_key(&id));
-        assert!(sa.registor(id, pass).is_err());
+        let mut a = Accounts(HashMap::new());
+        assert!(a.registor(id, pass).is_ok());
+        assert!(a.0.contains_key(&id));
+        assert!(a.registor(id, pass).is_err());
     }
     /*
     #[test]
     fn registor_without_pass_test() {
         let id = [0; 32];
         let wrong_pass = [1; 32];
-        let mut sa = SecretAccounts(HashMap::new());
-        match sa.registor_without_pass(id) {
+        let mut a = Accounts(HashMap::new());
+        match a.registor_without_pass(id) {
             Ok(pass) => { 
-                assert!(sa.authorize(id, pass).is_ok());
-                assert!(sa.authorize(id, wrong_pass).is_err());
-                assert!(sa.registor_without_pass(id).is_err());
+                assert!(a.authorize(id, pass).is_ok());
+                assert!(a.authorize(id, wrong_pass).is_err());
+                assert!(a.registor_without_pass(id).is_err());
             },
             Err(err) => {
                 panic!(err);
@@ -179,9 +179,9 @@ mod tests {
         let not_exist_id = [2; 32];
         let mut hm = HashMap::new();
         hm.insert(id, pass);
-        let sa = SecretAccounts(hm);
-        assert!(sa.is_exist(id));
-        assert!(!sa.is_exist(not_exist_id));
+        let a = Accounts(hm);
+        assert!(a.is_exist(id));
+        assert!(!a.is_exist(not_exist_id));
     }
 
     #[test]
@@ -190,8 +190,8 @@ mod tests {
         let pass = [1; 32];
         let mut hm = HashMap::new();
         hm.insert(id, pass);
-        let sa = SecretAccounts(hm);
-        assert!(sa.authorize(id, pass).is_ok());
+        let a = Accounts(hm);
+        assert!(a.authorize(id, pass).is_ok());
     }
 
     #[test]
@@ -200,33 +200,33 @@ mod tests {
         let pass = [1; 32];
         let mut hm = HashMap::new();
         hm.insert(id, pass);
-        let sa = SecretAccounts(hm);
+        let a = Accounts(hm);
 
         let wrong_id = [2; 32];
         let wrong_pass = [3; 32];
-        assert!(sa.authorize(wrong_id, wrong_pass).is_err());
-        assert!(sa.authorize(id, wrong_pass).is_err());
+        assert!(a.authorize(wrong_id, wrong_pass).is_err());
+        assert!(a.authorize(id, wrong_pass).is_err());
     }
 
     #[test]
     fn registor_and_authorize_success_test() {
         let id = [0; 32];
         let pass = [1; 32];
-        let mut sa = SecretAccounts(HashMap::new());
-        assert!(sa.registor(id, pass).is_ok());
-        assert!(sa.authorize(id, pass).is_ok());
+        let mut a = Accounts(HashMap::new());
+        assert!(a.registor(id, pass).is_ok());
+        assert!(a.authorize(id, pass).is_ok());
     }
 
     #[test]
     fn registor_and_authorize_fail_test() {
         let id = [0; 32];
         let pass = [1; 32];
-        let mut sa = SecretAccounts(HashMap::new());
-        assert!(sa.registor(id, pass).is_ok());
+        let mut a = Accounts(HashMap::new());
+        assert!(a.registor(id, pass).is_ok());
 
         let wrong_id = [2; 32];
         let wrong_pass = [3; 32];
-        assert!(sa.authorize(wrong_id, wrong_pass).is_err());
+        assert!(a.authorize(wrong_id, wrong_pass).is_err());
     }
 
     #[test]
@@ -235,14 +235,14 @@ mod tests {
         let pass = [1; 32];
         let new_pass = [3; 32];
         let wrong_pass = [4; 32];
-        let mut sa = SecretAccounts(HashMap::new());
-        assert!(sa.registor(id, pass).is_ok());
-        assert!(sa.authorize(id, pass).is_ok());
-        assert!(sa.authorize(id, new_pass).is_err());
-        assert!(sa.reset_pass(id, wrong_pass, new_pass).is_err());
-        assert!(sa.reset_pass(id, pass, new_pass).is_ok());
-        assert!(sa.authorize(id, pass).is_err());
-        assert!(sa.authorize(id, new_pass).is_ok());
+        let mut a = Accounts(HashMap::new());
+        assert!(a.registor(id, pass).is_ok());
+        assert!(a.authorize(id, pass).is_ok());
+        assert!(a.authorize(id, new_pass).is_err());
+        assert!(a.reset_pass(id, wrong_pass, new_pass).is_err());
+        assert!(a.reset_pass(id, pass, new_pass).is_ok());
+        assert!(a.authorize(id, pass).is_err());
+        assert!(a.authorize(id, new_pass).is_ok());
     }
 
     #[test]
@@ -256,8 +256,8 @@ mod tests {
         hm.insert(id,pass);
         hm.insert(second_id,second_pass);
 
-        let mut sa = SecretAccounts(hm);
-        let mut ids = sa.retrieve_all_account_ids();
+        let mut a = Accounts(hm);
+        let mut ids = a.retrieve_all_account_ids();
         let mut expected_ids = Vec::new();
         expected_ids.push(id);
         expected_ids.push(second_id);
