@@ -23,8 +23,13 @@ type Pass = [u8; 32];
 struct SecretAccounts (HashMap<Id, Pass>);
 
 impl SecretAccounts {
-    fn registor(&mut self, id:Id, pass: Pass) {
-        self.0.insert(id, pass);
+    fn registor(&mut self, id:Id, pass: Pass) -> Result<(), &'static str> {
+        if self.is_exist(id) {
+            return Err("id is already used");
+        } else {
+            self.0.insert(id, pass);
+            return Ok(());
+        }
     }
     fn authorize(&self, id: Id, pass: Pass) -> bool {
         self.0.get(&id) == Some(&pass)
@@ -55,8 +60,12 @@ impl ContractInterface for Contract {
     #[no_mangle]
     fn registor(id: Id, pass: Pass) {
         let mut accounts = Self::get_accounts();
-        accounts.registor(id, pass);
-        write_state!(SECRET_ACCOUNTS => accounts);
+       match accounts.registor(id, pass) {
+           Ok(_) => {
+               write_state!(SECRET_ACCOUNTS => accounts);
+           },
+           Err(_) => {},
+       };
     }
     
     fn authorize(id: Id, pass: Pass) -> bool {
@@ -78,8 +87,9 @@ mod tests {
         let id = [0; 32];
         let pass = [1; 32];
         let mut sa = SecretAccounts(HashMap::new());
-        sa.registor(id, pass);
+        assert!(sa.registor(id, pass).is_ok());
         assert!(sa.0.contains_key(&id));
+        assert!(sa.registor(id, pass).is_err());
     }
 
     #[test]
@@ -124,7 +134,7 @@ mod tests {
         let id = [0; 32];
         let pass = [1; 32];
         let mut sa = SecretAccounts(HashMap::new());
-        sa.registor(id, pass);
+        assert!(sa.registor(id, pass).is_ok());
         assert!(sa.authorize(id, pass));
     }
 
@@ -133,7 +143,7 @@ mod tests {
         let id = [0; 32];
         let pass = [1; 32];
         let mut sa = SecretAccounts(HashMap::new());
-        sa.registor(id, pass);
+        assert!(sa.registor(id, pass).is_ok());
 
         let wrong_id = [2; 32];
         let wrong_pass = [3; 32];
