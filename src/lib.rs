@@ -66,16 +66,19 @@ impl ContractInterface for Contract {
     }
     */
     
+    #[no_mangle]
     fn authorize(id: Id, pass: Pass) -> bool {
         let accounts = Self::get_accounts();
         accounts.authorize(id, pass) == Ok(())
     }
 
+    #[no_mangle]
     fn is_exist(id: Id) -> bool {
         let accounts = Self::get_accounts();
         accounts.is_exist(id)
     }
 
+    #[no_mangle]
     fn get_account_ids() -> Vec<Id> {
         let mut accounts = Self::get_accounts();
         accounts.retrieve_all_account_ids()
