@@ -49,7 +49,7 @@ impl Contract {
 // Public trait defining public-facing secret contract functions
 #[pub_interface]
 pub trait ContractInterface {
-    fn registor(id: Id, pass: Pass);
+    fn registor(id: Id, pass: Pass) -> bool;
     fn authorize(id: Id, pass: Pass) -> bool;
     fn is_exist(id: Id) -> bool;
 }
@@ -58,14 +58,18 @@ pub trait ContractInterface {
 // trait implementation for the Contract struct above
 impl ContractInterface for Contract {
     #[no_mangle]
-    fn registor(id: Id, pass: Pass) {
+    fn registor(id: Id, pass: Pass) -> bool{
         let mut accounts = Self::get_accounts();
-       match accounts.registor(id, pass) {
-           Ok(_) => {
-               write_state!(SECRET_ACCOUNTS => accounts);
-           },
-           Err(_) => {},
-       };
+        let successed = match accounts.registor(id, pass) {
+            Ok(_) => {
+                write_state!(SECRET_ACCOUNTS => accounts);
+                true
+            },
+            Err(_) => {
+                false
+            },
+        };
+       return successed
     }
     
     fn authorize(id: Id, pass: Pass) -> bool {
