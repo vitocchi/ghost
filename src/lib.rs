@@ -31,6 +31,21 @@ impl SecretAccounts {
             return Ok(());
         }
     }
+    /*
+    fn registor_without_pass(&mut self, id:Id) -> Result<(Pass), &'static str> {
+        if self.is_exist(id) {
+            return Err("id is already used");
+        }
+        let mut pass: Pass = [0; 32];
+        Rand::gen_slice(&mut pass);
+        match self.registor(id, pass) {
+            Ok(_) => {
+                Ok(pass)
+            },
+            Err(e) => Err(e),
+        }
+    }
+    */
     fn authorize(&self, id: Id, pass: Pass) -> Result<(), &'static str> {
         if self.0.get(&id) == Some(&pass) {
             return Ok(());
@@ -69,6 +84,7 @@ impl Contract {
 #[pub_interface]
 pub trait ContractInterface {
     fn registor(id: Id, pass: Pass) -> bool;
+    // fn registor_without_pass(id: Id) -> Pass;
     fn authorize(id: Id, pass: Pass) -> bool;
     fn is_exist(id: Id) -> bool;
     fn get_account_ids() -> Vec<Id>;
@@ -91,6 +107,21 @@ impl ContractInterface for Contract {
         };
        return successed
     }
+
+    /*
+    fn registor_without_pass(id: Id) -> Pass {
+        let mut accounts = Self::get_accounts();
+        match accounts.registor_without_pass(id) {
+            Ok(pass) => {
+                write_state!(SECRET_ACCOUNTS => accounts);
+                pass
+            },
+            Err(_) => {
+                [0; 32]
+            }
+        }
+    }
+    */
     
     fn authorize(id: Id, pass: Pass) -> bool {
         let accounts = Self::get_accounts();
@@ -121,6 +152,24 @@ mod tests {
         assert!(sa.0.contains_key(&id));
         assert!(sa.registor(id, pass).is_err());
     }
+    /*
+    #[test]
+    fn registor_without_pass_test() {
+        let id = [0; 32];
+        let wrong_pass = [1; 32];
+        let mut sa = SecretAccounts(HashMap::new());
+        match sa.registor_without_pass(id) {
+            Ok(pass) => { 
+                assert!(sa.authorize(id, pass).is_ok());
+                assert!(sa.authorize(id, wrong_pass).is_err());
+                assert!(sa.registor_without_pass(id).is_err());
+            },
+            Err(err) => {
+                panic!(err);
+            }
+        };
+    }
+    */
 
     #[test]
     fn is_exist_test() {
