@@ -29,6 +29,9 @@ impl SecretAccounts {
     fn authorize(&self, id: Id, pass: Pass) -> bool {
         self.0.get(&id) == Some(&pass)
     }
+    fn is_exist(&self, id: Id) -> bool {
+        self.0.get(&id) != None
+    }
 }
 
 // Private functions accessible only by the secret contract
@@ -43,6 +46,7 @@ impl Contract {
 pub trait ContractInterface {
     fn registor(id: Id, pass: Pass);
     fn authorize(id: Id, pass: Pass) -> bool;
+    fn is_exist(id: Id) -> bool;
 }
 
 // Implementation of the public-facing secret contract functions defined in the ContractInterface
@@ -59,6 +63,11 @@ impl ContractInterface for Contract {
         let accounts = Self::get_accounts();
         accounts.authorize(id, pass)
     }
+
+    fn is_exist(id: Id) -> bool {
+        let accounts = Self::get_accounts();
+        accounts.is_exist(id)
+    }
 }
 
 #[cfg(test)]
@@ -71,6 +80,19 @@ mod tests {
         let mut sa = SecretAccounts(HashMap::new());
         sa.registor(id, pass);
         assert!(sa.0.contains_key(&id));
+    }
+
+    #[test]
+    fn is_exist_test() {
+        let id = [0; 32];
+        let pass = [1; 32];
+
+        let not_exist_id = [2; 32];
+        let mut hm = HashMap::new();
+        hm.insert(id, pass);
+        let sa = SecretAccounts(hm);
+        assert!(sa.is_exist(id));
+        assert!(!sa.is_exist(not_exist_id));
     }
 
     #[test]
@@ -94,6 +116,7 @@ mod tests {
         let wrong_id = [2; 32];
         let wrong_pass = [3; 32];
         assert!(!sa.authorize(wrong_id, wrong_pass));
+        assert!(!sa.authorize(id, wrong_pass));
     }
 
     #[test]
