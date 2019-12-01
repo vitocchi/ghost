@@ -5,13 +5,13 @@ extern crate serde;
 extern crate hex;
 use eng_wasm::*;
 use eng_wasm_derive::pub_interface;
-mod accounts;
+pub mod accounts;
 use accounts::{Id, Pass, Accounts};
 
 /*
  Encrypted state keys
 */
-static SECRET_ACCOUNTS: &str = "secret_accounts";
+pub static SECRET_ACCOUNTS: &str = "secret_accounts";
 
 // Public struct Contract which will consist of private and public-facing secret contract functions
 pub struct Contract;
