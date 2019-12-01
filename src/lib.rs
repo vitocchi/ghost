@@ -19,7 +19,7 @@ pub struct Contract;
 type Id = [u8; 32];
 type Pass = [u8; 32];
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, std::fmt::Debug)]
 struct SecretAccounts (HashMap<Id, Pass>);
 
 impl SecretAccounts {
@@ -37,6 +37,13 @@ impl SecretAccounts {
     fn is_exist(&self, id: Id) -> bool {
         self.0.get(&id) != None
     }
+    fn retrieve_all_account_ids(&mut self) -> Vec<Id> {
+        let mut vec = Vec::new();
+        for (id, _) in self.0.drain() {
+            vec.push(id);
+        }
+        return vec;
+    }
 }
 
 // Private functions accessible only by the secret contract
@@ -52,7 +59,8 @@ pub trait ContractInterface {
     fn registor(id: Id, pass: Pass) -> bool;
     fn authorize(id: Id, pass: Pass) -> bool;
     fn is_exist(id: Id) -> bool;
-}
+    fn get_account_ids() -> Vec<Id>;
+} 
 
 // Implementation of the public-facing secret contract functions defined in the ContractInterface
 // trait implementation for the Contract struct above
@@ -81,11 +89,17 @@ impl ContractInterface for Contract {
         let accounts = Self::get_accounts();
         accounts.is_exist(id)
     }
+
+    fn get_account_ids() -> Vec<Id> {
+        let mut accounts = Self::get_accounts();
+        accounts.retrieve_all_account_ids()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use eng_wasm::Vec;
     #[test]
     fn registor_test() {
         let id = [0; 32];
@@ -152,5 +166,24 @@ mod tests {
         let wrong_id = [2; 32];
         let wrong_pass = [3; 32];
         assert!(!sa.authorize(wrong_id, wrong_pass));
+    }
+
+    #[test]
+    fn retrieve_all_account_ids_test() {
+        let id = [0; 32];
+        let pass = [1; 32];
+
+        let second_id = [2; 32];
+        let second_pass = [3; 32];
+        let mut hm = HashMap::new();
+        hm.insert(id,pass);
+        hm.insert(second_id,second_pass);
+
+        let mut sa = SecretAccounts(hm);
+        let ids = sa.retrieve_all_account_ids();
+        let mut expected_ids = Vec::new();
+        expected_ids.push(second_id);
+        expected_ids.push(id);
+        assert_eq!(ids, expected_ids);
     }
 }
