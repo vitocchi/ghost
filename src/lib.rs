@@ -7,8 +7,8 @@ use eng_wasm::*;
 use eng_wasm_derive::pub_interface;
 mod account_service;
 use account_service::{AccountService, AccountRepositoryInterface};
-mod accounts;
-use accounts::{Id, Pass, Accounts};
+mod account;
+use account::{Id, Pass, Account};
 
 /*
  Encrypted state keys
@@ -28,11 +28,12 @@ impl Contract {
 struct AccountRepository;
 
 impl AccountRepositoryInterface for AccountRepository{
-    fn get_accounts(&self) -> Accounts {
-        read_state!(SECRET_ACCOUNTS).unwrap()
+    fn get(&self, id: &Id) -> Option<Account> {
+        Some(read_state!(id).unwrap())
     }
-    fn store_accounts(&self, accounts: Accounts) {
-        write_state!(SECRET_ACCOUNTS => accounts);
+
+    fn save(&self, account: &Account) {
+        write_state!(&(account.id) => &(account.pass));
     }
 }
 
@@ -43,7 +44,6 @@ pub trait ContractInterface {
     // fn registor_without_pass(id: Id) -> Pass;
     fn authorize(id: Id, pass: Pass) -> bool;
     fn is_exist(id: Id) -> bool;
-    fn get_account_ids() -> Vec<Id>;
 } 
 
 // Implementation of the public-facing secret contract functions defined in the ContractInterface
@@ -78,10 +78,5 @@ impl ContractInterface for Contract {
     #[no_mangle]
     fn is_exist(id: Id) -> bool {
         Self::service().is_exist(id)
-    }
-
-    #[no_mangle]
-    fn get_account_ids() -> Vec<Id> {
-        Self::service().get_account_ids()
     }
 }

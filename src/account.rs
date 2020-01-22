@@ -1,13 +1,26 @@
 use eng_wasm::*;
 use serde::{Serialize, Deserialize};
-use std::collections::HashMap;
 
-pub type Id = [u8; 32];
-pub type Pass = [u8; 32];
+pub type Id = String;
+pub type Pass = String;
 
 #[derive(Serialize, Deserialize, std::fmt::Debug)]
-pub struct Accounts (HashMap<Id, Pass>);
+pub struct Account {
+    pub id: Id, 
+    pub pass: Pass
+}
 
+impl Account {
+    pub fn new(id: Id, pass: Pass) -> Account {
+        Account{
+            id: id,
+            pass: pass,
+        }
+    }
+}
+
+
+/*
 impl Accounts {
     pub fn registor(&mut self, id:Id, pass: Pass) -> Result<(), &'static str> {
         if self.is_exist(id) {
@@ -184,3 +197,4 @@ mod tests {
         assert_eq!(ids.sort(), expected_ids.sort());
     }
 }
+*/
