@@ -24,17 +24,21 @@ struct AccountRepository;
 
 impl AccountRepositoryInterface for AccountRepository{
     fn get(&self, id: &Id) -> Option<Account> {
-        Some(read_state!(id).unwrap())
+        match read_state!(id) {
+            Some(pass) => Some(Account::new(id.to_string(), pass)),
+            None => None,
+        }
     }
 
     fn save(&self, account: &Account) {
-        write_state!(&(account.id) => &(account.pass));
+        write_state!(&(account.id) => account.pass.clone());
     }
 }
 
 // Public trait defining public-facing secret contract functions
 #[pub_interface]
 pub trait ContractInterface {
+    fn ping() -> String;
     fn registor(id: Id, pass: Pass) -> bool;
     // fn registor_without_pass(id: Id) -> Pass;
     fn authorize(id: Id, pass: Pass) -> bool;
@@ -44,6 +48,10 @@ pub trait ContractInterface {
 // Implementation of the public-facing secret contract functions defined in the ContractInterface
 // trait implementation for the Contract struct above
 impl ContractInterface for Contract {
+    #[no_mangle]
+    fn ping() -> String {
+        "pong".to_string()
+    }
     #[no_mangle]
     fn registor(id: Id, pass: Pass) -> bool {
         Self::service().registor(id, pass)
