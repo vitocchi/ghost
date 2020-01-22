@@ -10,11 +10,6 @@ use account_service::{AccountService, AccountRepositoryInterface};
 mod account;
 use account::{Id, Pass, Account};
 
-/*
- Encrypted state keys
-*/
-pub static SECRET_ACCOUNTS: &str = "secret_accounts";
-
 // Public struct Contract which will consist of private and public-facing secret contract functions
 pub struct Contract;
 
@@ -50,7 +45,7 @@ pub trait ContractInterface {
 // trait implementation for the Contract struct above
 impl ContractInterface for Contract {
     #[no_mangle]
-    fn registor(id: Id, pass: Pass) -> bool{
+    fn registor(id: Id, pass: Pass) -> bool {
         Self::service().registor(id, pass)
     }
 

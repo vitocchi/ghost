@@ -1,4 +1,3 @@
-use eng_wasm::*;
 use super::account::{Id, Pass, Account};
 
 pub struct AccountService<T> {
@@ -49,11 +48,8 @@ impl <T: AccountRepositoryInterface> AccountService<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use eng_wasm::*;
 
-    //const EXIST_ID: [u8; 32] = [0; 32];
-    //const EMPTY_ID: [u8; 32] = [1; 32];
-    //const PASS: [u8; 32] = [100; 32];
-    //const WRONG_PASS: [u8; 32] = [101; 32];
     const EXIST_ID: &'static str = "existID";
     const EMPTY_ID: &'static str = "emptyID";
     const PASS: &'static str = "PASS";
