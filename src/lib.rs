@@ -13,6 +13,8 @@ use account::{Id, Pass, Account};
 // Public struct Contract which will consist of private and public-facing secret contract functions
 pub struct Contract;
 
+pub static SECRET_ACCOUNT: &str = "secret_account";
+
 // Private functions accessible only by the secret contract
 impl Contract {
     fn service() -> AccountService<AccountRepository> {
