@@ -1,6 +1,6 @@
 pub mod account;
 pub mod error;
-use self::account::*;
+use self::account::Account;
 use self::error::Error;
 use eng_wasm::*;
 
@@ -9,7 +9,7 @@ pub struct AccountService<T> {
 }
 
 pub trait AccountRepositoryInterface {
-    fn get(&self, id: &Id) -> Option<Account>;
+    fn get(&self, id: &str) -> Option<Account>;
     fn get_all(&self) -> Vec<Account>;
     fn save(&self, account: Account);
 }
@@ -21,7 +21,7 @@ impl<T: AccountRepositoryInterface> AccountService<T> {
         }
     }
 
-    pub fn registor(&self, id: Id, pass: Pass) -> Result<(), Error> {
+    pub fn registor(&self, id: String, pass: String) -> Result<(), Error> {
         match self.repository.get(&id) {
             Some(_) => Result::Err(Error::AccountAlreadyExists),
             None => {
@@ -32,7 +32,7 @@ impl<T: AccountRepositoryInterface> AccountService<T> {
         }
     }
 
-    pub fn authorize(&self, id: Id, pass: Pass) -> Result<Account, Error> {
+    pub fn authorize(&self, id: String, pass: String) -> Result<Account, Error> {
         match self.repository.get(&id) {
             Some(a) => {
                 if a.pass == pass {
@@ -45,13 +45,13 @@ impl<T: AccountRepositoryInterface> AccountService<T> {
         }
     }
 
-    pub fn is_exist(&self, id: Id) -> bool {
+    pub fn is_exist(&self, id: String) -> bool {
         self.repository.get(&id).is_some()
     }
 
-    pub fn get_all_ids(&self) -> Vec<Id> {
+    pub fn get_all_ids(&self) -> Vec<String> {
         let accounts = self.repository.get_all();
-        let mut ids: Vec<Id> = Vec::new();
+        let mut ids: Vec<String> = Vec::new();
         for a in accounts {
             ids.push(a.id);
         }
@@ -72,7 +72,7 @@ mod tests {
 
     struct AccountRepositoryMock {}
     impl AccountRepositoryInterface for AccountRepositoryMock {
-        fn get(&self, id: &Id) -> Option<Account> {
+        fn get(&self, id: &str) -> Option<Account> {
             match id as &str {
                 EXIST_ID => Some(Account::new(EXIST_ID.to_string(), PASS.to_string())),
                 _ => None,
@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn get_all_ids_test() {
         let service = AccountService::new(AccountRepositoryMock {});
-        let mut vec: Vec<Id> = Vec::with_capacity(1);
+        let mut vec: Vec<String> = Vec::with_capacity(1);
         vec.push(EXIST_ID.to_string());
         vec.push(EXIST_ID_2.to_string());
         assert_eq!(service.get_all_ids(), vec);

@@ -1,17 +1,14 @@
 use eng_wasm::*;
 use serde::{Deserialize, Serialize};
 
-pub type Id = String;
-pub type Pass = String;
-
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Account {
-    pub id: Id,
-    pub pass: Pass,
+    pub id: String,
+    pub pass: String,
 }
 
 impl Account {
-    pub fn new(id: Id, pass: Pass) -> Account {
+    pub fn new(id: String, pass: String) -> Account {
         Account { id: id, pass: pass }
     }
 }

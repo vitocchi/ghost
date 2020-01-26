@@ -3,10 +3,11 @@ extern crate eng_wasm;
 extern crate eng_wasm_derive;
 extern crate hex;
 extern crate serde;
-use eng_wasm::*;
 mod account_service;
-use account_service::account::*;
-use account_service::*;
+pub use account_service::account::Account;
+pub use account_service::error::Error;
+use account_service::{AccountRepositoryInterface, AccountService};
+use eng_wasm::*;
 
 // Public struct Contract which will consist of private and public-facing secret contract functions
 pub struct SecretAccount {
@@ -20,12 +21,12 @@ impl SecretAccount {
         }
     }
 
-    pub fn registor(&self, id: String, pass: String) -> bool {
-        self.service.registor(id, pass).is_ok()
+    pub fn registor(&self, id: String, pass: String) -> Result<(), Error> {
+        self.service.registor(id, pass)
     }
 
-    pub fn authorize(&self, id: String, pass: String) -> bool {
-        self.service.authorize(id, pass).is_ok()
+    pub fn authorize(&self, id: String, pass: String) -> Result<Account, Error> {
+        self.service.authorize(id, pass)
     }
 
     pub fn is_exist(&self, id: String) -> bool {
@@ -42,7 +43,7 @@ static SECRET_ACCOUNT: &str = "SECRET_ACCOUNT";
 struct AccountRepository;
 
 impl AccountRepositoryInterface for AccountRepository {
-    fn get(&self, id: &Id) -> Option<Account> {
+    fn get(&self, id: &str) -> Option<Account> {
         match Self::read() {
             Some(accounts) => accounts.into_iter().find(|a| &a.id == id),
             None => None,
