@@ -1,10 +1,8 @@
-pub mod account;
-pub mod error;
-use self::account::Account;
-use self::error::Error;
+use super::account::Account;
+use super::error::Error;
 use eng_wasm::*;
 
-pub struct AccountService<T> {
+pub struct GhostCore<T> {
     repository: T,
 }
 
@@ -14,9 +12,9 @@ pub trait AccountRepositoryInterface {
     fn save(&self, account: Account);
 }
 
-impl<T: AccountRepositoryInterface> AccountService<T> {
-    pub fn new(repository: T) -> AccountService<T> {
-        AccountService {
+impl<T: AccountRepositoryInterface> GhostCore<T> {
+    pub fn new(repository: T) -> GhostCore<T> {
+        GhostCore {
             repository: repository,
         }
     }
@@ -50,9 +48,9 @@ impl<T: AccountRepositoryInterface> AccountService<T> {
     }
 
     pub fn get_all_ids(&self) -> Vec<String> {
-        let accounts = self.repository.get_all();
+        let ghosts = self.repository.get_all();
         let mut ids: Vec<String> = Vec::new();
-        for a in accounts {
+        for a in ghosts {
             ids.push(a.id);
         }
         return ids;
@@ -89,16 +87,14 @@ mod tests {
 
     #[test]
     fn registor_test() {
-        let service = AccountService::new(AccountRepositoryMock {});
+        let core = GhostCore::new(AccountRepositoryMock {});
         assert_eq!(
-            service
-                .registor(EMPTY_ID.to_string(), PASS.to_string())
+            core.registor(EMPTY_ID.to_string(), PASS.to_string())
                 .unwrap(),
             ()
         );
         assert_eq!(
-            service
-                .registor(EXIST_ID.to_string(), PASS.to_string())
+            core.registor(EXIST_ID.to_string(), PASS.to_string())
                 .unwrap_err(),
             Error::AccountAlreadyExists
         );
@@ -106,22 +102,19 @@ mod tests {
 
     #[test]
     fn authorize_test() {
-        let service = AccountService::new(AccountRepositoryMock {});
+        let core = GhostCore::new(AccountRepositoryMock {});
         assert_eq!(
-            service
-                .authorize(EXIST_ID.to_string(), PASS.to_string())
+            core.authorize(EXIST_ID.to_string(), PASS.to_string())
                 .unwrap(),
             Account::new(EXIST_ID.to_string(), PASS.to_string())
         );
         assert_eq!(
-            service
-                .authorize(EXIST_ID.to_string(), WRONG_PASS.to_string())
+            core.authorize(EXIST_ID.to_string(), WRONG_PASS.to_string())
                 .unwrap_err(),
             Error::AuthorizeFailed
         );
         assert_eq!(
-            service
-                .authorize(EMPTY_ID.to_string(), PASS.to_string())
+            core.authorize(EMPTY_ID.to_string(), PASS.to_string())
                 .unwrap_err(),
             Error::AuthorizeFailed
         );
@@ -129,17 +122,17 @@ mod tests {
 
     #[test]
     fn is_exist_test() {
-        let service = AccountService::new(AccountRepositoryMock {});
-        assert_eq!(service.is_exist(EXIST_ID.to_string()), true);
-        assert_eq!(service.is_exist(EMPTY_ID.to_string()), false);
+        let core = GhostCore::new(AccountRepositoryMock {});
+        assert_eq!(core.is_exist(EXIST_ID.to_string()), true);
+        assert_eq!(core.is_exist(EMPTY_ID.to_string()), false);
     }
 
     #[test]
     fn get_all_ids_test() {
-        let service = AccountService::new(AccountRepositoryMock {});
+        let core = GhostCore::new(AccountRepositoryMock {});
         let mut vec: Vec<String> = Vec::with_capacity(1);
         vec.push(EXIST_ID.to_string());
         vec.push(EXIST_ID_2.to_string());
-        assert_eq!(service.get_all_ids(), vec);
+        assert_eq!(core.get_all_ids(), vec);
     }
 }

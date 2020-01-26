@@ -3,42 +3,44 @@ extern crate eng_wasm;
 extern crate eng_wasm_derive;
 extern crate hex;
 extern crate serde;
-mod account_service;
-pub use account_service::account::Account;
-pub use account_service::error::Error;
-use account_service::{AccountRepositoryInterface, AccountService};
+mod account;
+mod error;
+mod ghost_core;
+pub use account::Account;
 use eng_wasm::*;
+pub use error::Error;
+use ghost_core::{AccountRepositoryInterface, GhostCore};
 
 // Public struct Contract which will consist of private and public-facing secret contract functions
-pub struct SecretAccount {
-    service: AccountService<AccountRepository>,
+pub struct Ghost {
+    core: GhostCore<AccountRepository>,
 }
 
-impl SecretAccount {
-    pub fn new() -> SecretAccount {
-        SecretAccount {
-            service: AccountService::new(AccountRepository {}),
+impl Ghost {
+    pub fn new() -> Ghost {
+        Ghost {
+            core: GhostCore::new(AccountRepository {}),
         }
     }
 
     pub fn registor(&self, id: String, pass: String) -> Result<(), Error> {
-        self.service.registor(id, pass)
+        self.core.registor(id, pass)
     }
 
     pub fn authorize(&self, id: String, pass: String) -> Result<Account, Error> {
-        self.service.authorize(id, pass)
+        self.core.authorize(id, pass)
     }
 
     pub fn is_exist(&self, id: String) -> bool {
-        self.service.is_exist(id)
+        self.core.is_exist(id)
     }
 
     pub fn get_all_ids(&self) -> Vec<String> {
-        self.service.get_all_ids()
+        self.core.get_all_ids()
     }
 }
 
-static SECRET_ACCOUNT: &str = "SECRET_ACCOUNT";
+static GHOST_ACCOUNT: &str = "GHOST_ACCOUNT";
 
 struct AccountRepository;
 
@@ -66,10 +68,10 @@ impl AccountRepositoryInterface for AccountRepository {
 
 impl AccountRepository {
     fn read() -> Option<Vec<Account>> {
-        read_state!(SECRET_ACCOUNT)
+        read_state!(GHOST_ACCOUNT)
     }
 
     fn write(accounts: Vec<Account>) {
-        write_state!(SECRET_ACCOUNT => accounts);
+        write_state!(GHOST_ACCOUNT => accounts);
     }
 }
