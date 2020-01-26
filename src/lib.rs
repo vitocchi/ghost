@@ -38,7 +38,7 @@ impl SecretAccount {
     }
 }
 
-static SECRET_ACCOUNT_PREFIX: &str = "secret_account_";
+static SECRET_ACCOUNT: &str = "SECRET_ACCOUNT";
 
 struct AccountRepository;
 
@@ -66,10 +66,10 @@ impl AccountRepositoryInterface for AccountRepository {
 
 impl AccountRepository {
     fn read() -> Option<Vec<Account>> {
-        read_state!(SECRET_ACCOUNT_PREFIX)
+        read_state!(SECRET_ACCOUNT)
     }
 
     fn write(accounts: Vec<Account>) {
-        write_state!(SECRET_ACCOUNT_PREFIX => accounts);
+        write_state!(SECRET_ACCOUNT => accounts);
     }
 }
