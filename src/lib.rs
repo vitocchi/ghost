@@ -33,7 +33,7 @@ impl SecretAccount {
         self.service.is_exist(id)
     }
 
-    pub fn get_all(&self) -> Vec<String> {
+    pub fn get_all_ids(&self) -> Vec<String> {
         self.service.get_all_ids()
     }
 }
