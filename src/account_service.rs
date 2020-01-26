@@ -91,6 +91,7 @@ mod tests {
     use eng_wasm::*;
 
     const EXIST_ID: &'static str = "existID";
+    const EXIST_ID_2: &'static str = "existID_2";
     const EMPTY_ID: &'static str = "emptyID";
     const PASS: &'static str = "PASS";
     const WRONG_PASS: &'static str = "wrongPASS";
@@ -106,6 +107,7 @@ mod tests {
         fn get_all(&self) -> Vec<Account> {
             let mut vec: Vec<Account> = Vec::with_capacity(1);
             vec.push(Account::new(EXIST_ID.to_string(), PASS.to_string()));
+            vec.push(Account::new(EXIST_ID_2.to_string(), PASS.to_string()));
             return vec;
         }
         fn save(&self, _account: Account) {}
@@ -163,6 +165,7 @@ mod tests {
         let service = AccountService::new(AccountRepositoryMock {});
         let mut vec: Vec<Id> = Vec::with_capacity(1);
         vec.push(EXIST_ID.to_string());
+        vec.push(EXIST_ID_2.to_string());
         assert_eq!(service.get_all_ids(), vec);
     }
 }
