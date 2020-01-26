@@ -5,9 +5,8 @@ extern crate hex;
 extern crate serde;
 use eng_wasm::*;
 mod account_service;
-use account_service::{AccountRepositoryInterface, AccountService};
-mod account;
-use account::{Account, Id};
+use account_service::account::*;
+use account_service::*;
 
 // Public struct Contract which will consist of private and public-facing secret contract functions
 pub struct SecretAccount {

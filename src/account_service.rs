@@ -1,4 +1,5 @@
-use super::account::{Account, Id, Pass};
+pub mod account;
+use account::*;
 use eng_wasm::*;
 use std::error::*;
 use std::fmt;
