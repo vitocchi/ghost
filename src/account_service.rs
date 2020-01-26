@@ -1,7 +1,7 @@
 pub mod account;
-mod service_result;
+pub mod error;
 use self::account::*;
-use self::service_result::*;
+use self::error::Error;
 use eng_wasm::*;
 
 pub struct AccountService<T> {
@@ -21,9 +21,9 @@ impl<T: AccountRepositoryInterface> AccountService<T> {
         }
     }
 
-    pub fn registor(&self, id: Id, pass: Pass) -> ServiceResult<()> {
+    pub fn registor(&self, id: Id, pass: Pass) -> Result<(), Error> {
         match self.repository.get(&id) {
-            Some(_) => ServiceResult::Err(ServiceError::AccountAlreadyExists),
+            Some(_) => Result::Err(Error::AccountAlreadyExists),
             None => {
                 let a = Account::new(id, pass);
                 self.repository.save(a);
@@ -32,16 +32,16 @@ impl<T: AccountRepositoryInterface> AccountService<T> {
         }
     }
 
-    pub fn authorize(&self, id: Id, pass: Pass) -> ServiceResult<Account> {
+    pub fn authorize(&self, id: Id, pass: Pass) -> Result<Account, Error> {
         match self.repository.get(&id) {
             Some(a) => {
                 if a.pass == pass {
                     return Ok(a);
                 } else {
-                    return Err(ServiceError::AuthorizeFailed);
+                    return Err(Error::AuthorizeFailed);
                 }
             }
-            None => Err(ServiceError::AuthorizeFailed),
+            None => Err(Error::AuthorizeFailed),
         }
     }
 
@@ -100,7 +100,7 @@ mod tests {
             service
                 .registor(EXIST_ID.to_string(), PASS.to_string())
                 .unwrap_err(),
-            ServiceError::AccountAlreadyExists
+            Error::AccountAlreadyExists
         );
     }
 
@@ -117,13 +117,13 @@ mod tests {
             service
                 .authorize(EXIST_ID.to_string(), WRONG_PASS.to_string())
                 .unwrap_err(),
-            ServiceError::AuthorizeFailed
+            Error::AuthorizeFailed
         );
         assert_eq!(
             service
                 .authorize(EMPTY_ID.to_string(), PASS.to_string())
                 .unwrap_err(),
-            ServiceError::AuthorizeFailed
+            Error::AuthorizeFailed
         );
     }
 
