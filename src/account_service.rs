@@ -1,9 +1,8 @@
 pub mod account;
-use account::*;
+mod service_result;
+use self::account::*;
+use self::service_result::*;
 use eng_wasm::*;
-use std::error::*;
-use std::fmt;
-use std::result;
 
 pub struct AccountService<T> {
     repository: T,
@@ -13,32 +12,6 @@ pub trait AccountRepositoryInterface {
     fn get(&self, id: &Id) -> Option<Account>;
     fn get_all(&self) -> Vec<Account>;
     fn save(&self, account: Account);
-}
-
-type ServiceResult<T> = result::Result<T, ServiceError>;
-
-#[derive(Debug, PartialEq)]
-pub enum ServiceError {
-    AccountAlreadyExists,
-    AuthorizeFailed,
-}
-
-impl fmt::Display for ServiceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            ServiceError::AccountAlreadyExists => f.write_str("AccountAlreadyExists"),
-            ServiceError::AuthorizeFailed => f.write_str("AuthorizeFailed"),
-        }
-    }
-}
-
-impl Error for ServiceError {
-    fn description(&self) -> &str {
-        match *self {
-            ServiceError::AccountAlreadyExists => "Account already exists",
-            ServiceError::AuthorizeFailed => "Authorize failed",
-        }
-    }
 }
 
 impl<T: AccountRepositoryInterface> AccountService<T> {
