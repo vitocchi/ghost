@@ -22,15 +22,19 @@ impl SecretAccount {
     }
 
     pub fn registor(&self, id: String, pass: String) -> bool {
-        self.service.registor(id, pass)
+        self.service.registor(id, pass).is_ok()
     }
 
     pub fn authorize(&self, id: String, pass: String) -> bool {
-        self.service.authorize(id, pass)
+        self.service.authorize(id, pass).is_ok()
     }
 
     pub fn is_exist(&self, id: String) -> bool {
         self.service.is_exist(id)
+    }
+
+    pub fn get_all(&self) -> Vec<String> {
+        self.service.get_all_ids()
     }
 }
 
@@ -40,13 +44,32 @@ struct AccountRepository;
 
 impl AccountRepositoryInterface for AccountRepository {
     fn get(&self, id: &Id) -> Option<Account> {
-        match read_state!(&(eformat!("{}{}", SECRET_ACCOUNT_PREFIX, id))) {
-            Some(pass) => Some(Account::new(id.to_string(), pass)),
+        match Self::read() {
+            Some(accounts) => accounts.into_iter().find(|a| &a.id == id),
             None => None,
         }
     }
 
-    fn save(&self, account: &Account) {
-        write_state!(&(eformat!("{}{}", SECRET_ACCOUNT_PREFIX, account.id)) => account.pass.clone());
+    fn get_all(&self) -> Vec<Account> {
+        match Self::read() {
+            Some(a) => a,
+            None => Vec::new(),
+        }
+    }
+
+    fn save(&self, account: Account) {
+        let mut accounts: Vec<Account> = self.get_all();
+        accounts.push(account);
+        Self::write(accounts);
+    }
+}
+
+impl AccountRepository {
+    fn read() -> Option<Vec<Account>> {
+        read_state!(SECRET_ACCOUNT_PREFIX)
+    }
+
+    fn write(accounts: Vec<Account>) {
+        write_state!(SECRET_ACCOUNT_PREFIX => accounts);
     }
 }
