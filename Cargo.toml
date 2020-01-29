@@ -1,9 +1,6 @@
 [package]
-name = "contract"
+name = "ghost"
 version = "0.1.0"
-
-[lib]
-crate-type = ["cdylib"]     # Create a dynamic library to be loaded from another language
 
 [dependencies]
 eng-wasm = "0.1"
