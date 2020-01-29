@@ -5,6 +5,7 @@ use std::fmt;
 pub enum Error {
     AccountAlreadyExists,
     AuthorizeFailed,
+    AccountNotFound,
 }
 
 impl fmt::Display for Error {
@@ -12,6 +13,7 @@ impl fmt::Display for Error {
         match *self {
             Error::AccountAlreadyExists => f.write_str("AccountAlreadyExists"),
             Error::AuthorizeFailed => f.write_str("AuthorizeFailed"),
+            Error::AccountNotFound => f.write_str("AccountNotFound"),
         }
     }
 }
@@ -21,6 +23,7 @@ impl error::Error for Error {
         match *self {
             Error::AccountAlreadyExists => "Account already exists",
             Error::AuthorizeFailed => "Authorize failed",
+            Error::AccountNotFound => "Account not found",
         }
     }
 }

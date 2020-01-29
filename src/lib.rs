@@ -38,6 +38,10 @@ impl Ghost {
     pub fn get_all_ids(&self) -> Vec<String> {
         self.core.get_all_ids()
     }
+
+    pub fn delete(&self, id: String, pass: String) -> Result<(), Error> {
+        self.core.delete(id, pass)
+    }
 }
 
 static GHOST_ACCOUNT: &str = "GHOST_ACCOUNT";
@@ -46,29 +50,40 @@ struct AccountRepository;
 
 impl AccountRepositoryInterface for AccountRepository {
     fn get(&self, id: &str) -> Option<Account> {
-        match Self::read() {
-            Some(accounts) => accounts.into_iter().find(|a| &a.id == id),
-            None => None,
-        }
+        let accounts: Vec<Account> = Self::read();
+        return accounts.into_iter().find(|a| &a.id == id);
     }
 
     fn get_all(&self) -> Vec<Account> {
-        match Self::read() {
-            Some(a) => a,
-            None => Vec::new(),
-        }
+        Self::read()
     }
 
     fn save(&self, account: Account) {
-        let mut accounts: Vec<Account> = self.get_all();
+        let mut accounts: Vec<Account> = Self::read();
         accounts.push(account);
         Self::write(accounts);
+    }
+
+    fn delete_by_id(&self, id: &str) -> Result<(), Error> {
+        let mut accounts: Vec<Account> = Self::read();
+        let index = accounts.iter().position(|a| &a.id == id);
+        match index {
+            Some(index) => {
+                accounts.remove(index);
+                Self::write(accounts);
+                return Ok(());
+            }
+            None => return Err(Error::AccountNotFound),
+        }
     }
 }
 
 impl AccountRepository {
-    fn read() -> Option<Vec<Account>> {
-        read_state!(GHOST_ACCOUNT)
+    fn read() -> Vec<Account> {
+        match read_state!(GHOST_ACCOUNT) {
+            Some(a) => a,
+            None => Vec::new(),
+        }
     }
 
     fn write(accounts: Vec<Account>) {

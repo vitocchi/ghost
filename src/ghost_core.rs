@@ -10,6 +10,7 @@ pub trait AccountRepositoryInterface {
     fn get(&self, id: &str) -> Option<Account>;
     fn get_all(&self) -> Vec<Account>;
     fn save(&self, account: Account);
+    fn delete_by_id(&self, id: &str) -> Result<(), Error>;
 }
 
 impl<T: AccountRepositoryInterface> GhostCore<T> {
@@ -55,6 +56,12 @@ impl<T: AccountRepositoryInterface> GhostCore<T> {
         }
         return ids;
     }
+
+    pub fn delete(&self, id: String, pass: String) -> Result<(), Error> {
+        let a = self.authorize(id, pass)?;
+        self.repository.delete_by_id(&a.id).unwrap();
+        return Ok(());
+    }
 }
 
 #[cfg(test)]
@@ -83,6 +90,9 @@ mod tests {
             return vec;
         }
         fn save(&self, _account: Account) {}
+        fn delete_by_id(&self, _id: &str) -> Result<(), Error> {
+            Ok(())
+        }
     }
 
     #[test]
@@ -134,5 +144,19 @@ mod tests {
         vec.push(EXIST_ID.to_string());
         vec.push(EXIST_ID_2.to_string());
         assert_eq!(core.get_all_ids(), vec);
+    }
+
+    #[test]
+    fn delete_test() {
+        let core = GhostCore::new(AccountRepositoryMock {});
+        assert_eq!(
+            core.delete(EMPTY_ID.to_string(), PASS.to_string())
+                .unwrap_err(),
+            Error::AuthorizeFailed
+        );
+        assert_eq!(
+            core.delete(EXIST_ID.to_string(), PASS.to_string()).unwrap(),
+            ()
+        );
     }
 }
